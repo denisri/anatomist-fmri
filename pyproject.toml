@@ -39,8 +39,8 @@ repository = "https://github.com/denisri/anatomist-fmri"
 requires = ["setuptools >= 61.0"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools.packages.find]
-where = ["python"]
+#[tool.setuptools.packages.find]
+#where = ["python"]
 
 #[tool.setuptools.package-data]
 #twingame = ['share/*']
