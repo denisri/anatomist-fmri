@@ -16,3 +16,15 @@ or to run the "casa-distro container":
 bv ananil.py
 ```
 
+For developers, if you are using a Casa-Distro developer container, you can add in the container encvironment `config/bv_maker.cfg`:
+
+in `[ source $CASA_SRC ]`:
+```
+  git git@github.com:denisri/anatomist-fmri.git main anatomist/anatomist-fmri/master
+```
+
+in `[ build $CASA_BUILD ]`:
+```
+  + $CASA_SRC/anatomist/anatomist-fmri/master
+```
+then the `bv_maker` build tool will include it in its update/build process.
