@@ -12,7 +12,7 @@ The tool is meant to be used for a specific data layout, a data directory contai
 
 BrainVISA/Anatomist should be installed or part of the build project (see https://brainvisa.info/web/download.html). However as currently it requires new features which will be new in Anatomist >= 5.2 (unreleased yet), a developer install with master branches is needed: see https://brainvisa.info/web/download.html#developer-environment-installation.
 
-# Using it
+## Using it
 
 When things are built or installed, just go (`cd`) to the data directory, and run:
 
