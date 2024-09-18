@@ -3,9 +3,14 @@ Anatomist application for fMRI visualization
 
 A dedicated application to display functional MRI based on Anatomist.
 
-BrainVISA/Anatomist should be installed or part of the build project (see https://brainvisa.info/web/download.html). However as currently it requires new features which will be new in Anatomist >= 5.2 (unreleased yet), a developer install with master branches is needed: see https://brainvisa.info/web/download.html#developer-environment-installation
+BrainVISA/Anatomist should be installed or part of the build project (see https://brainvisa.info/web/download.html). However as currently it requires new features which will be new in Anatomist >= 5.2 (unreleased yet), a developer install with master branches is needed: see https://brainvisa.info/web/download.html#developer-environment-installation.
 
-When built, just go (`cd`) to the data directory, and run:
+The tool is meant to be used for a specific data layout, a data directory containing:
+- a `fMRIprep` directory containg anatomical MRIs, and preprocessed fMRI in a BIDS organization.
+- a `fMRIprep/sourcedata/freesurfer` subdirectory containing BIDS-organized anats and meshes from Freesurfer.
+- a `first_level` directory containing processed z-maps and contrasts, in a BIDS organization
+
+When things are built or installed, just go (`cd`) to the data directory, and run:
 
 ```
 ananil.py
