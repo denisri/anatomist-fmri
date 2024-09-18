@@ -25,7 +25,7 @@ For developers, if you are using a Casa-Distro developer container, you can add 
 
 in `[ source $CASA_SRC ]`:
 ```
-  git git@github.com:denisri/anatomist-fmri.git main anatomist/anatomist-fmri/master
+  git https://github.com/denisri/anatomist-fmri.git main anatomist/anatomist-fmri/master
 ```
 
 in `[ build $CASA_BUILD ]`:
