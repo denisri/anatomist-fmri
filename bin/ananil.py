@@ -14,28 +14,31 @@ import glob
 
 
 '''
-inverser Z et contrasts
-En fait on devrait pouvoir voir l'un ou l'autre
-choisir par regex, drag&drop
-1 seule liste, 2 boutons par item
+TODO:
 
-Groupes de cartes
+Contrasts / Z maps:
+should be only 1 list, with 2 check buttons for each, to display in the 2D/3D display and/or plots
+select which are contrasts / z maps:
+choose by regex ? drag & drop ?
+
+Maps groups, with bins
+For bins, would need a curve plot
 
 anat:
 fMRIprep/sub-01/ses-01/anat/sub-01_ses-01_space-MNI152NLin2009cAsym_desc-preproc_T1w.nii.gz
 
-dernière étape: *_desc_preproc
+the last step of fmriprep always has: *_desc_preproc
 
-display: nativr space
+display: in native space
 
 masks / ROIs: column for masks
-display average in a region
+display average in a region. Optionally (button?)
 
-Thresholds / color scales: one cursor for all subjects, but one per contrast
+Thresholds / color scales: one cursor per contrast, shared for all subjects
 
 clusters defined on-the-fly by thresholds
 
-inflated meshes
+see inflated meshes
 
 colorbars
 
