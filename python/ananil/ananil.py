@@ -15,7 +15,7 @@ import glob
 TODO:
 
 Contrasts / Z maps:
-should be only 1 list, with 2 check buttons for each, to display in the 2D/3D display and/or plots
+should be only 1 list, with 2 check buttons for each, to display in the 2D/3D display and/or plots -> OK
 select which are contrasts / z maps:
 choose by regex ? drag & drop ?
 
@@ -111,26 +111,16 @@ class ContrastPanel(Qt.QMainWindow):
         zmap_wid = Qt.QWidget()
         zmap_lay = Qt.QVBoxLayout(zmap_wid)
         split.addWidget(zmap_wid)
-        zmap_lay.addWidget(Qt.QLabel('Zmaps:'))
-        self.zmap_box = Qt.QListWidget()
+        self.zmap_box = Qt.QTableWidget()
         zmap_lay.addWidget(self.zmap_box)
         self.zmap_box.itemClicked.connect(self.zmap_clicked)
-
-        ctr_wid = Qt.QWidget()
-        ctr_lay = Qt.QVBoxLayout(ctr_wid)
-        split.addWidget(ctr_wid)
-        ctr_lay.addWidget(Qt.QLabel('Contrasts:'))
-        self.ctr_box = Qt.QListWidget()
-        ctr_lay.addWidget(self.ctr_box)
-        self.ctr_box.itemClicked.connect(self.contrast_clicked)
 
         self.block = a.createWindowsBlock(visible=True, default_block=True)
         split.addWidget(self.block.internalWidget.widget)
 
         split.setStretchFactor(0, 0)
         split.setStretchFactor(1, 0)
-        split.setStretchFactor(2, 0)
-        split.setStretchFactor(3, 10)
+        split.setStretchFactor(2, 10)
 
         self.init_study()
 
@@ -157,27 +147,28 @@ class ContrastPanel(Qt.QMainWindow):
         sub = None
         if len(subjects) != 0:
             sub = subjects[0]
-        zmaps = self.parse_zmaps(sub)
+        zmaps = self.parse_zmaps(sub) + self.parse_contrasts(sub)
         self.zmap_box.clear()
-        for c in zmaps:
+        self.zmap_box.setColumnCount(3)
+        self.zmap_box.setHorizontalHeaderLabels(['V', 'P',
+                                                 'Zmaps / contrasts'])
+        self.zmap_box.horizontalHeader().setSectionResizeMode(
+            Qt.QHeaderView.ResizeToContents)
+        self.zmap_box.setRowCount(len(zmaps))
+        for i, c in enumerate(zmaps):
             cn = c.split('.')[0]
             cn = cn.split('_zmap_')[1]
-            item = Qt.QListWidgetItem(cn)
-            item.setCheckState(Qt.Qt.Unchecked)
-            self.zmap_box.addItem(item)
-
-        contrasts = self.parse_contrasts(sub)
-        self.ctr_box.clear()
-        for c in contrasts:
-            cn = c.split('.')[0]
-            cn = cn.split('_zmap_')[1]
-            item = Qt.QListWidgetItem(cn)
-            item.setCheckState(Qt.Qt.Unchecked)
-            self.ctr_box.addItem(item)
+            item0 = Qt.QTableWidgetItem('')
+            item0.setCheckState(Qt.Qt.Unchecked)
+            self.zmap_box.setItem(i, 0, item0)
+            item1 = Qt.QTableWidgetItem('')
+            item1.setCheckState(Qt.Qt.Unchecked)
+            self.zmap_box.setItem(i, 1, item1)
+            item = Qt.QTableWidgetItem(cn)
+            self.zmap_box.setItem(i, 2, item)
 
         sz = [self.sub_box.sizeHintForColumn(0),
-              self.zmap_box.sizeHintForColumn(0),
-              self.ctr_box.sizeHintForColumn(0)]
+              self.zmap_box.sizeHint().width()]
         sz.append(self.width() - sum(sz))
         self.splitter.setSizes(sz)
 
@@ -211,16 +202,15 @@ class ContrastPanel(Qt.QMainWindow):
         return selected
 
     def selected_zmaps(self):
-        selected = [self.zmap_box.item(i)
-                    for i in range(self.zmap_box.count())]
-        selected = [item.text() for item in selected
-                    if item.checkState() == Qt.Qt.Checked]
+        selected = [i for i in range(self.zmap_box.rowCount())
+                    if self.zmap_box.item(i, 0).checkState() == Qt.Qt.Checked]
+        selected = [self.zmap_box.item(i, 2).text() for i in selected]
         return selected
 
     def selected_contrasts(self):
-        selected = [self.ctr_box.item(i) for i in range(self.ctr_box.count())]
-        selected = [item.text() for item in selected
-                    if item.checkState() == Qt.Qt.Checked]
+        selected = [i for i in range(self.zmap_box.rowCount())
+                    if self.zmap_box.item(i, 1).checkState() == Qt.Qt.Checked]
+        selected = [self.zmap_box.item(i, 2).text() for i in selected]
         return selected
 
     def sub_clicked(self):
@@ -229,6 +219,7 @@ class ContrastPanel(Qt.QMainWindow):
         self.display_subjects(subjects, contrasts)
 
     def zmap_clicked(self):
+        print('zmap clicked')
         self.sub_clicked()
 
     def contrast_clicked(self):
