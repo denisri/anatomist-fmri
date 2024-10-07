@@ -113,7 +113,10 @@ class ContrastPanel(Qt.QMainWindow):
         split.addWidget(zmap_wid)
         self.zmap_box = Qt.QTableWidget()
         zmap_lay.addWidget(self.zmap_box)
-        self.zmap_box.itemClicked.connect(self.zmap_clicked)
+        self.zmap_box.cellClicked.connect(self.zmap_clicked)
+        self.zmap_box.horizontalHeader().sectionClicked.connect(
+            self.zmap_col_clicked)
+        self.zmap_box.itemSelectionChanged.connect(self.zmap_selection_changed)
 
         self.block = a.createWindowsBlock(visible=True, default_block=True)
         split.addWidget(self.block.internalWidget.widget)
@@ -214,16 +217,54 @@ class ContrastPanel(Qt.QMainWindow):
         return selected
 
     def sub_clicked(self):
+        Qt.QApplication.instance().setOverrideCursor(Qt.QCursor(
+            Qt.Qt.WaitCursor))
         subjects = self.selected_subjects()
         contrasts = self.selected_contrasts()
         self.display_subjects(subjects, contrasts)
+        Qt.QApplication.instance().restoreOverrideCursor()
 
-    def zmap_clicked(self):
-        print('zmap clicked')
+    def zmap_clicked(self, row, col):
+        # print('zmap clicked')
         self.sub_clicked()
 
-    def contrast_clicked(self):
-        self.sub_clicked()
+    def zmap_col_clicked(self, index):
+        if index in (0, 1):
+            sel = getattr(self, '_zmap_sel', [[], []])[0]
+            now_sel = self.zmap_box.selectedItems()
+            print('sel:', sel)
+            self.zmap_box.blockSignals(True)
+
+            for item in now_sel:
+                item.setSelected(False)
+            sel_rows = set()
+            for item in sel:
+                item.setSelected(True)
+                sel_rows.add(item.row())
+
+            self._zmap_sel = [sel, sel]
+
+            first = True
+            sch = Qt.Qt.Checked
+            for row in sel_rows:
+                item = self.zmap_box.item(row, index)
+                if first:
+                    sch = item.checkState()
+                    if sch == Qt.Qt.Checked:
+                        sch = Qt.Qt.Unchecked
+                    else:
+                        sch = Qt.Qt.Checked
+                    print('->', sch)
+                    first = False
+                item.setCheckState(sch)
+
+            self.zmap_box.blockSignals(False)
+            self.sub_clicked()
+
+    def zmap_selection_changed(self):
+        if not hasattr(self, '_zmap_sel'):
+            self._zmap_sel = [[], []]
+        self._zmap_sel = [self._zmap_sel[1], self.zmap_box.selectedItems()]
 
     def display_subjects(self, subjects, contrasts):
         print('subjects:', subjects)
