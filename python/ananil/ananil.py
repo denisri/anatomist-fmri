@@ -152,9 +152,14 @@ class ContrastPanel(Qt.QMainWindow):
             sub = subjects[0]
         zmaps = self.parse_zmaps(sub) + self.parse_contrasts(sub)
         self.zmap_box.clear()
-        self.zmap_box.setColumnCount(3)
+        self.zmap_box.setColumnCount(4)
         self.zmap_box.setHorizontalHeaderLabels(['V', 'P',
-                                                 'Zmaps / contrasts'])
+                                                 'Zmaps / contrasts', 'Col'])
+        pal_icn = Qt.QIcon(aims.carto.Paths.findResourceFile(
+            'icons/meshPaint/palette.png', 'anatomist'))
+        if not pal_icn.isNull():
+            item = Qt.QTableWidgetItem(pal_icn, '')
+            self.zmap_box.setHorizontalHeaderItem(3, item)
         self.zmap_box.horizontalHeader().setSectionResizeMode(
             Qt.QHeaderView.ResizeToContents)
         self.zmap_box.setRowCount(len(zmaps))
@@ -225,6 +230,10 @@ class ContrastPanel(Qt.QMainWindow):
         Qt.QApplication.instance().restoreOverrideCursor()
 
     def zmap_clicked(self, row, col):
+        if col == 3:  # colormaps
+            self.edit_colormap(row)
+            return
+
         # print('zmap clicked')
         self.sub_clicked()
 
@@ -664,3 +673,17 @@ class ContrastPanel(Qt.QMainWindow):
         if osp.exists(xfmf):
             sb_to_mni = aims.read(xfmf)
         return sb_to_mni
+
+    def edit_colormap(self, row):
+        print('edit colormap', row)
+        zmap = self.zmap_box.item(row, 2).text()
+        print('contrast:', zmap)
+        zmaps = {}
+        for sub, sd in self.sub_data.items():
+            cmaps = sd.get('zmaps', {})
+            if zmap in cmaps:
+                zmaps[sub] = cmaps[zmap]
+        print('loaded zmaps:', zmaps)
+        if len(zmaps) != 0:
+            a = ana.Anatomist()
+            a.execute('PopupPalette', objects=list(zmaps.values()))
