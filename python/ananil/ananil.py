@@ -443,33 +443,29 @@ class ContrastPanel(Qt.QMainWindow):
                 # print('load zmap:', zmap, ':', ozmap)
                 if ozmap:
                     cmaps[zmap] = ozmap
-        if len(cmaps) >= 2 and self.binarize_multi_z:
-            if 'zmap_labels' not in sd:
-                amaps = [a.toAimsObject(m) for m in cmaps.values()]
-                labelmap = aims.Volume(amaps[0].getSize(), dtype='S32')
-                labelmap.copyHeaderFrom(amaps[0].header())
-                labelmap.fill(0)
-                for i, m in enumerate(amaps):
-                    bmap = m.np
-                    labelmap.np[bmap <= -self.binarize_threshold] \
-                        += -(3 ** i)
-                    labelmap.np[bmap >= self.binarize_threshold] += 3 ** i
-                    labelmap.header()['volumeInterpolation'] = 0
-                    olabelmap = a.toAObject(labelmap)
-                    olabelmap.releaseAppRef()
-                    sd['zmap_labels'] = olabelmap
-                    minVal = 0
-                    maxVal = np.ceil((3 ** len(amaps)) / 2) - 1
-                    cmaps = {'labels': olabelmap}
-        else:
-            minVal = 1.96  # p = 0.05
+        if cmaps:
+            minVal = self.binarize_threshold  # p = 0.05
             maxVal = 7.
-        if cmaps and views:
             zmaps = list(cmaps.values())
             a.setObjectPalette(objects=zmaps,
                                palette='sym_blue_yellow_red', minVal=minVal,
                                maxVal=maxVal, zeroCentered1=True,
                                absoluteMode=True)
+        if len(cmaps) >= 2 and self.binarize_multi_z:
+            if 'zmap_labels' not in sd:
+                amap = a.toAimsObject(next(iter(cmaps.values())))
+                labelmap = aims.Volume(amap.getSize(), dtype='S32')
+                labelmap.copyHeaderFrom(amap.header())
+                labelmap.header()['volumeInterpolation'] = 0
+                olabelmap = a.toAObject(labelmap)
+                olabelmap.releaseAppRef()
+                minVal = 0
+                maxVal = np.ceil((3 ** len(cmaps)) / 2) - 1
+                sd['zmap_labels'] = olabelmap
+                cmaps = {'labels': olabelmap}
+                self.fill_mixed_zmap(sub)
+        if cmaps and views:
+            zmaps = list(cmaps.values())
             obj = []
             if anat is not None:
                 obj.append(anat)
@@ -497,6 +493,35 @@ class ContrastPanel(Qt.QMainWindow):
                          windows=[views[self.sv.axial_view],
                                   views[self.sv.coronal_view],
                                   views[self.sv.sagittal_view]])
+
+    def fill_mixed_zmap(self, sub):
+        a = ana.Anatomist()
+        sd = self.sub_data.setdefault(sub, {})
+        olabelmap = sd.get('zmap_labels')
+        if olabelmap is None:
+            return
+        cmaps = list(sd.get('zmaps', {}).values())
+        amaps = [a.toAimsObject(m) for m in cmaps]
+        labelmap = a.toAimsObject(olabelmap)
+        labelmap.fill(0)
+        for i, m in enumerate(amaps):
+            cm = cmaps[i]
+            th = cm.palette().absMin1(cm)
+            if th < 0:
+                th = 0
+            bmap = m.np
+            labelmap.np[bmap <= -th] += -(3 ** i)
+            labelmap.np[bmap >= th] += 3 ** i
+        olabelmap.setChanged()
+        minVal = 0
+        maxVal = np.max(np.abs(labelmap.np))
+        print('maxVal:', maxVal)
+        olabelmap.internalUpdate()
+        a.setObjectPalette(objects=[olabelmap],
+                           palette='sym_blue_yellow_red', minVal=minVal,
+                           maxVal=maxVal, zeroCentered1=True,
+                           absoluteMode=True)
+        olabelmap.notifyObservers()
 
     def display_contrasts(self, sub):
         print('display_contrasts', sub)
