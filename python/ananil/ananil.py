@@ -3,6 +3,7 @@
 import sys
 from soma.qt_gui import ipkernel_tools
 import anatomist.direct.api as ana
+import anatomist.cpp.minipalettewidget as minipw
 from soma.qt_gui.qt_backend import Qt
 from soma import aims
 import numpy as np
@@ -179,6 +180,9 @@ class ContrastPanel(Qt.QMainWindow):
               self.zmap_box.sizeHint().width()]
         sz.append(self.width() - sum(sz))
         self.splitter.setSizes(sz)
+        #self.zmap_box.horizontalHeader().setSectionResizeMode(
+            #Qt.QHeaderView.Interactive)
+        self.zmap_box.horizontalHeader().setStretchLastSection(True)
 
     def parse_subjects(self):
         subjects = glob.glob(osp.join(self.fmriprep_dir, 'sub-*'))
@@ -710,5 +714,13 @@ class ContrastPanel(Qt.QMainWindow):
                 zmaps[sub] = cmaps[zmap]
         print('loaded zmaps:', zmaps)
         if len(zmaps) != 0:
-            a = ana.Anatomist()
-            a.execute('PopupPalette', objects=list(zmaps.values()))
+            zmap = next(iter(zmaps.values()))
+            print('use zmap:', zmap)
+            # cmaped = minipw.MiniPaletteWidgetEdit(zmap)
+            cmaped = minipw.MiniPaletteWidget(zmap, edit_parent=None)
+            print('cmaped:', cmaped)
+            #cmaped.resize(150, cmaped.height())
+            self.zmap_box.setCellWidget(row, 3, cmaped)
+            #self.zmap_box.setCellWidget(row, 3, Qt.QLineEdit())
+            #a = ana.Anatomist()
+            #a.execute('PopupPalette', objects=list(zmaps.values()))
