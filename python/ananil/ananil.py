@@ -3,7 +3,7 @@
 import sys
 from soma.qt_gui import ipkernel_tools
 import anatomist.direct.api as ana
-import anatomist.cpp.minipalettewidget as minipw
+import anatomist.cpp as anacpp
 from soma.qt_gui.qt_backend import Qt
 from soma import aims
 import numpy as np
@@ -716,9 +716,8 @@ class ContrastPanel(Qt.QMainWindow):
         if len(zmaps) != 0:
             zmap = next(iter(zmaps.values()))
             print('use zmap:', zmap)
-            # cmaped = minipw.MiniPaletteWidgetEdit(zmap)
-            cmaped = minipw.MiniPaletteWidget(zmap, edit_parent=None)
-            print('cmaped:', cmaped)
+            # cmaped = anacpp.MiniPaletteWidgetEdit(zmap)
+            cmaped = anacpp.MiniPaletteWidget(zmap, True, True, None)
             #cmaped.resize(150, cmaped.height())
             self.zmap_box.setCellWidget(row, 3, cmaped)
             #self.zmap_box.setCellWidget(row, 3, Qt.QLineEdit())
