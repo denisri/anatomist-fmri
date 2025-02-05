@@ -717,7 +717,7 @@ class ContrastPanel(Qt.QMainWindow):
             zmap = next(iter(zmaps.values()))
             print('use zmap:', zmap)
             # cmaped = anacpp.MiniPaletteWidgetEdit(zmap)
-            cmaped = anacpp.MiniPaletteWidget(zmap, True, True, None)
+            cmaped = anacpp.MiniPaletteWidget(zmap, 0, True, True, None)
             #cmaped.resize(150, cmaped.height())
             self.zmap_box.setCellWidget(row, 3, cmaped)
             #self.zmap_box.setCellWidget(row, 3, Qt.QLineEdit())
